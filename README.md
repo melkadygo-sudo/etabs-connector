@@ -12,7 +12,21 @@ Inspect models, read assignments, change sections and restraints, run analysis, 
 
 ETABS runs on your computer. This package does not supply ETABS, a license, or CSI assemblies. Building locally copies the installed interop assembly into the local build output; do not redistribute that output with this source package.
 
-## Quick start
+## Easy installation (Windows)
+
+1. [Download ZIP](https://github.com/melkadygo-sudo/etabs-connector/archive/refs/heads/main.zip) and choose **Extract all**.
+2. Open the extracted folder and double-click **INSTALL.cmd**.
+3. Follow any Windows/.NET prompts, then restart Codex and open ETABS 23.
+
+No terminal commands or configuration editing are needed for a new Codex setup when its CLI is available. The installer detects ETABS 23 (or opens a file picker), installs the .NET 8 SDK through Microsoft's WinGet package if needed, builds into `%LOCALAPPDATA%\ETABS-Connector`, checks server startup, registers the `etabs23` MCP server, and installs the user skill. Internet access is needed for missing dependencies and build restore. ETABS must already be installed and licensed.
+
+New installations start read-only. Existing settings, skills, and an existing `etabs23` registration are preserved. If Codex CLI is unavailable or an existing server points elsewhere, setup reports the remaining manual step and provides `mcp-config.json` in the installation folder for your client. Windows security or administrator prompts may still require a click; this is not a silent installer. Run only the extracted package, not INSTALL.cmd alone inside a ZIP.
+
+To enable model edits later, open `%LOCALAPPDATA%\ETABS-Connector\connector.settings.ps1`, change the write and analysis values to `true`, and restart the client.
+
+Ask: **Use ETABS Connector to inspect my model without changes.**
+
+## Manual installation / other MCP clients
 
 1. Download this repository as a ZIP and extract it, or clone it.
 2. Open PowerShell in the extracted repository and install:
@@ -21,7 +35,7 @@ ETABS runs on your computer. This package does not supply ETABS, a license, or C
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install-etabs-connector.ps1 -AllowedRoots "C:\ETABS-MCP"
 ```
 
-This command leaves writes and analysis disabled. To enable them, rerun with `-EnableWrites -EnableAnalysis`. The double-click `.cmd` installer enables both.
+This command leaves writes and analysis disabled. On a first manual installation, add `-EnableWrites -EnableAnalysis` to enable them. Existing settings are preserved; edit `connector.settings.ps1` to change permissions. The older `scripts/install-etabs-connector.cmd` enables both on a first install; the recommended root `INSTALL.cmd` starts read-only.
 
 3. Register the server in your MCP client using the settings below, replacing the sample absolute path with your extracted repository path:
 

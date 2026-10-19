@@ -9,9 +9,13 @@
 
 The connector uses ETABS COM automation supplied with ETABS (23). This source package does not redistribute CSI assemblies. Local compilation copies the installed interop assembly into the build output; do not publish that output.
 
-## Install
+## Recommended installation
 
-The easiest method is to double click:
+Download and extract the repository ZIP, then double-click the root **INSTALL.cmd**. It installs into `%LOCALAPPDATA%\ETABS-Connector`, detects ETABS (or asks you to select it), handles missing .NET through WinGet, builds and checks startup, and configures Codex when its CLI is available. Windows/package prompts remain interactive. New installations start read-only; existing settings and client registrations are preserved. See the README for exceptions and enabling changes.
+
+## Manual install
+
+The legacy launcher below enables writes and analysis on first installation:
 
 ```text
 scripts\install-etabs-connector.cmd

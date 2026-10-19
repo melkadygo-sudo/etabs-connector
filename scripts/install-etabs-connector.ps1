@@ -57,12 +57,15 @@ try {
 `$env:ETABS_CONNECTOR_ALLOW_ANALYSIS = '$AnalysisValue'
 `$env:ETABS_CONNECTOR_MAX_RESULT_ROWS = '10000'
 "@
-    Set-Content -Path $Settings -Value $SettingsContent -Encoding UTF8
+    if (Test-Path -LiteralPath $Settings) {
+        Write-Host 'Existing connector.settings.ps1 preserved. Edit it to change permissions.'
+    } else {
+        Set-Content -Path $Settings -Value $SettingsContent -Encoding UTF8
+    }
 
     Write-Host ""
     Write-Host "Installation completed successfully." -ForegroundColor Green
-    Write-Host "Writes enabled: $WriteValue"
-    Write-Host "Analysis enabled: $AnalysisValue"
+    Write-Host "Permission settings: $Settings"
     Write-Host ""
     Write-Host "Next: run test-etabs-connector.cmd while ETABS (23) is open."
     exit 0
