@@ -1,92 +1,184 @@
 # ETABS Connector
 
-Connect an AI assistant to a local ETABS 23 model through MCP. Includes a Codex skill, a Windows .NET server, installation scripts, and source code.
+**Connect Codex to ETABS 23. Inspect models, make controlled changes, and retrieve analysis results through natural-language requests.**
 
-Inspect models, read assignments, change sections and restraints, run analysis, and extract selected results. The generic API gateway discovers and invokes additional methods exposed by the locally installed ETABS API.
+Built for structural engineers working with ETABS on Windows. Includes a local MCP server, a Codex skill, a guided installer, and source code. MCP (Model Context Protocol) lets your AI assistant call tools exposed by the connector.
 
-## Requirements
+**Windows x64 · ETABS 23 · Version 0.1.3 · MIT license**
 
-- Windows x64 with a licensed installation of ETABS 23.
-- .NET 8 SDK and runtime.
-- An MCP client that supports local stdio servers.
+[**Download ZIP**](https://github.com/melkadygo-sudo/etabs-connector/archive/refs/heads/main.zip) · [Setup guide](docs/SETUP.md) · [Test results](docs/VALIDATION.md) · [Report an issue](https://github.com/melkadygo-sudo/etabs-connector/issues)
 
-ETABS runs on your computer. This package does not supply ETABS, a license, or CSI assemblies. Building locally copies the installed interop assembly into the local build output; do not redistribute that output with this source package.
+## What you can do
 
-## Easy installation (Windows)
+| Workflow | Examples |
+| --- | --- |
+| Inspect a model | Check model information, units, objects, properties, and load definitions. |
+| Review assignments | Read frame sections, area properties, and point restraints. |
+| Make controlled changes | Save a working copy and update supported assignments with write access enabled. |
+| Run analysis | Start analysis with write and analysis permissions enabled. |
+| Retrieve results | Extract selected joint reactions and frame forces for review. |
+| Explore the ETABS API | Discover and describe methods exposed by your installed ETABS 23 API. |
 
-1. [Download ZIP](https://github.com/melkadygo-sudo/etabs-connector/archive/refs/heads/main.zip) and choose **Extract all**.
-2. Open the extracted folder and double-click **INSTALL.cmd**.
-3. Follow any Windows/.NET prompts, then restart Codex and open ETABS 23.
+**New installations start read-only.** Enable model changes and analysis explicitly when you need them.
 
-No terminal commands or configuration editing are needed for a new Codex setup when its CLI is available. The installer detects ETABS 23 (or opens a file picker), installs the .NET 8 SDK if needed (WinGet when available, otherwise a SHA-512-verified SDK ZIP from Microsoft), builds into `%LOCALAPPDATA%\ETABS-Connector`, checks server startup, registers the `etabs23` MCP server, and installs the user skill. Internet access is needed for missing dependencies and build restore. ETABS must already be installed and licensed.
+## Get started in three steps
 
-New installations start read-only. Existing settings, skills, and an existing `etabs23` registration are preserved. If Codex CLI is unavailable or an existing server points elsewhere, setup reports the remaining manual step and provides `mcp-config.json` in the installation folder for your client. Windows security or administrator prompts may still require a click; this is not a silent installer. Run only the extracted package, not INSTALL.cmd alone inside a ZIP.
+### 1. Download and extract
 
-To enable model edits later, open `%LOCALAPPDATA%\ETABS-Connector\connector.settings.ps1`, change the write and analysis values to `true`, and restart the client.
+[**Download ETABS Connector**](https://github.com/melkadygo-sudo/etabs-connector/archive/refs/heads/main.zip), then choose **Extract all**.
 
-Ask: **Use ETABS Connector to inspect my model without changes.**
+Before installing, you need:
 
-## Manual installation / other MCP clients
+- **Windows x64** and a licensed installation of **ETABS 23**.
+- **Codex**, with its CLI available for automatic registration, or another MCP client that supports local stdio servers.
+- **Internet access** for dependency downloads and build restore.
 
-1. Download this repository as a ZIP and extract it, or clone it.
-2. Open PowerShell in the extracted repository and install:
+The installer handles the .NET 8 SDK when it is missing. ETABS and its license are not included.
+
+### 2. Run the installer
+
+Open the extracted folder and double-click **`INSTALL.cmd`**. Follow any Windows or dependency installation prompts.
+
+The installer detects ETABS, builds and checks the connector, registers it with Codex when its CLI is available, and installs the skill. No terminal commands or configuration editing are needed for a new Codex setup with its CLI available.
+
+> Run `INSTALL.cmd` from the extracted folder, not from inside the ZIP. If Codex CLI is unavailable or an existing `etabs23` registration points elsewhere, setup explains the remaining manual step. Existing settings and skills are preserved.
+
+### 3. Open ETABS and try your first request
+
+Restart Codex, open ETABS 23 with a test model, and send:
+
+```text
+Use ETABS Connector to inspect the active model without making changes.
+Report the model path, ETABS version, units, and load definitions.
+```
+
+Compare the response with the model open in ETABS before continuing.
+
+## Example requests
+
+**Review the model**
+
+```text
+List the frame sections assigned in the active model. Do not change anything.
+```
+
+**Change an assignment** — requires write permission
+
+```text
+Save a working copy of this model in my allowed folder. Ask me which frame
+and section to use, update that assignment, and read it back to verify it.
+```
+
+**Retrieve analysis results** — requires write and analysis permissions
+
+```text
+Ask me which load combination to review, run analysis, and extract the
+joint reactions for that combination. Include the units in the output.
+```
+
+## Enable editing and analysis
+
+The guided installer saves the connector in:
+
+```text
+%LOCALAPPDATA%\ETABS-Connector
+```
+
+Open `connector.settings.ps1` in that folder. Set the permissions you need to `'true'`, then restart your MCP client:
+
+```powershell
+$env:ETABS_CONNECTOR_ALLOW_WRITES = 'true'
+$env:ETABS_CONNECTOR_ALLOW_ANALYSIS = 'true'
+```
+
+Configure `ETABS_CONNECTOR_ALLOWED_ROOTS` for the folders containing your models and working copies. See the [setup guide](docs/SETUP.md) for custom paths and permissions.
+
+## What has been tested
+
+Version 0.1.3 passed installer and registration checks on the host and in a fresh Windows Sandbox session.
+
+| Check | Result |
+| --- | --- |
+| Download and verify .NET when both .NET and WinGet are absent | Passed in Windows Sandbox |
+| Build the connector and check server startup | Passed |
+| Register with the real Codex CLI and verify the registered command | Passed |
+| Install the skill and launch the registered MCP server | Passed |
+| Preserve existing settings and conflicting registrations | Passed |
+| Start with writes and analysis disabled | Passed |
+
+**Test scope:** ETABS files and Codex CLI binaries were supplied to the Sandbox through read-only mapped folders. Fresh ETABS/Codex desktop installation, ETABS activation, COM attachment, and model analysis were not tested there. The WinGet/UAC/reboot path and custom ETABS file picker remain untested.
+
+Read the [validation report](docs/VALIDATION.md) for the procedure and remaining checks.
+
+## Working with engineering models
+
+- Choose whether to save a working copy or use the open model before making changes. The connector can modify the open model directly when writes are enabled.
+- The connector automatically unlocks the model when required. Unlocking can invalidate analysis results.
+- Review assignments, units, loads, and results in ETABS. Successful solver completion does not establish engineering correctness.
+- Allowed folders constrain supported file operations. Generic API classification and path checks use heuristics; they are not a complete sandbox for every API side effect. Review generic methods and verify their results explicitly.
+
+ETABS automation runs locally. Model information returned to your AI client is handled under that client's data policies.
+
+## Other MCP clients and manual setup
+
+The connector supports clients that launch a local stdio MCP server. Installing the skill alone does not install or configure the server.
+
+<details>
+<summary><strong>Show manual installation and client configuration</strong></summary>
+
+Install the .NET 8 SDK, extract this repository, and open PowerShell in the extracted folder:
 
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install-etabs-connector.ps1 -AllowedRoots "C:\ETABS-MCP"
 ```
 
-This command leaves writes and analysis disabled. On a first manual installation, add `-EnableWrites -EnableAnalysis` to enable them. Existing settings are preserved; edit `connector.settings.ps1` to change permissions. The older `scripts/install-etabs-connector.cmd` enables both on a first install; the recommended root `INSTALL.cmd` starts read-only.
+This command starts with writes and analysis disabled. Existing settings are preserved. The legacy `scripts/install-etabs-connector.cmd` enables writes and analysis on first installation; use the root `INSTALL.cmd` for the recommended read-only setup.
 
-3. Register the server in your MCP client using the settings below, replacing the sample absolute path with your extracted repository path:
+Register the server in your client, replacing the sample path with your actual repository path:
 
 ```json
 {
   "mcpServers": {
     "etabs23": {
       "command": "powershell.exe",
-      "args": ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "C:\\tools\\etabs-connector\\scripts\\start-etabs-connector.ps1"]
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy", "Bypass",
+        "-File", "C:\\tools\\etabs-connector\\scripts\\start-etabs-connector.ps1"
+      ]
     }
   }
 }
 ```
 
-Client configuration formats differ; the command and arguments above describe the local stdio server. The included `.mcp.json` and `.codex-plugin/plugin.json` provide the existing plugin packaging. The skill is in [skills/etabs-connector/SKILL.md](skills/etabs-connector/SKILL.md); it requires the server.
+Client configuration formats vary. The command and arguments describe the local server. The package also includes `.mcp.json`, `.codex-plugin/plugin.json`, and the [Codex skill](skills/etabs-connector/SKILL.md).
 
-4. Open ETABS 23 with a disposable model, then run `scripts\test-etabs-connector.cmd`.
-5. Ask your assistant: **Use ETABS Connector to report capabilities and inspect the active model. Do not make changes.**
+Open ETABS with a disposable test model and run `scripts\test-etabs-connector.cmd`. Follow the [setup guide](docs/SETUP.md) for custom ETABS paths and troubleshooting.
 
-See [setup and troubleshooting](docs/SETUP.md) for custom ETABS paths and permissions.
+</details>
 
-## Example requests
+## Contributing and support
 
-- Inspect the active model and report its path, ETABS version, units, and load definitions.
-- Save a working copy, change the section of the specified frame, and verify the assignment.
-- Run analysis and extract joint reactions for the specified load combination, with units.
-- Find and describe an API method before invoking it.
+[Open an issue](https://github.com/melkadygo-sudo/etabs-connector/issues) with your Windows version, ETABS build, connector version, tool name, and a redacted error message. Suggestions and pull requests are welcome.
 
-## Model handling
+Do not upload confidential models, credentials, personal paths, or licensed CSI binaries.
 
-The skill asks whether to create a working copy or reuse the open model before changes. With writes enabled, the server can modify the open model directly and automatically unlock it when needed. Unlocking can invalidate analysis results.
-
-Allowed roots constrain supported file operations. They are not a sandbox for every possible ETABS API side effect. Generic API classification and path checks use naming heuristics; engineers must inspect the chosen method, parameters, and results. Generic calls do not provide the same read-back verification as purpose-built tools.
-
-Solver completion is not engineering validation. Review assignments, units, loads, results, and design assumptions in ETABS before relying on them.
-
-## Development and contributions
-
-Version 0.1.3 includes a real-Codex installer integration test. See [validation results and remaining clean-machine checks](docs/VALIDATION.md).
+<details>
+<summary><strong>Show developer build and smoke test</strong></summary>
 
 ```powershell
 dotnet publish .\src\EtabsConnector\EtabsConnector.csproj -c Release -r win-x64 --self-contained false -o .\dist
 Get-Content .\tests\mcp-smoke.ndjson | .\dist\EtabsConnector.exe
 ```
 
-The smoke fixture checks initialization, tool listing, and capabilities without connecting to or changing a model. ETABS-dependent workflows need separate testing on disposable models. No claim is made that every discoverable API method has been tested.
+The smoke test checks initialization, tool discovery, and capabilities without connecting to a model. ETABS workflows require separate testing on disposable models. Not every discoverable API method has been tested.
 
-When reporting an issue, include the ETABS build, Windows version, connector version, tool name, and a redacted error. Do not upload confidential models, personal paths, credentials, or licensed CSI binaries.
+Building locally copies the installed ETABS interop assembly into the build output. Do not redistribute that output with this source package.
 
-Independent project by Mohamed Elkady; not affiliated with or endorsed by Computers and Structures, Inc. or OpenAI.
+</details>
 
-## License
+## Author and license
 
-Connector source and skill: [MIT](LICENSE). ETABS and CSI assemblies remain subject to their own licenses and are not included.
+Created by **Mohamed Elkady**. Connector source and skill are available under the [MIT License](LICENSE).
+
+This is an independent project, not affiliated with or endorsed by Computers and Structures, Inc. or OpenAI. ETABS and CSI assemblies are subject to their own licenses and are not included.
