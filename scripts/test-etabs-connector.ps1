@@ -26,7 +26,7 @@ function Show-Check {
 
 try {
     Write-Host ""
-    Write-Host "ETABS Connector (0.1.1) Diagnostic Test" -ForegroundColor Cyan
+    Write-Host "ETABS Connector (0.1.2) Diagnostic Test" -ForegroundColor Cyan
     Write-Host "=======================================" -ForegroundColor Cyan
 
     $PluginRoot = Split-Path -Parent $PSScriptRoot

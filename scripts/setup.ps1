@@ -7,6 +7,15 @@ param(
     [switch]$NoDependencyInstall
 )
 $ErrorActionPreference = 'Stop'
+function Test-DotNetReady([string]$Executable) {
+    if (-not (Test-Path -LiteralPath $Executable)) { return $false }
+    $sdks = @(& $Executable --list-sdks)
+    if ($LASTEXITCODE -ne 0) { return $false }
+    $runtimes = @(& $Executable --list-runtimes)
+    if ($LASTEXITCODE -ne 0) { return $false }
+    return (@($sdks | Where-Object { $_ -match '^(8|9|[1-9][0-9]+)\.' }).Count -gt 0) -and
+        (@($runtimes | Where-Object { $_ -match '^Microsoft.NETCore.App 8\.' }).Count -gt 0)
+}
 try {
     Write-Host 'ETABS Connector - guided setup' -ForegroundColor Cyan
     Write-Host 'Installs locally, builds the server, and connects it to Codex when available.'
@@ -42,20 +51,16 @@ try {
         $found = Get-Command dotnet -ErrorAction SilentlyContinue
         if ($found) { $dotnet = $found.Source }
     }
-    $ready = $false
-    if (Test-Path -LiteralPath $dotnet) {
-        $sdks = @(& $dotnet --list-sdks)
-        $runtimes = @(& $dotnet --list-runtimes)
-        $ready = (@($sdks | Where-Object { $_ -match '^[89]\.|^[1-9][0-9]\.' }).Count -gt 0) -and (@($runtimes | Where-Object { $_ -match '^Microsoft.NETCore.App 8\.' }).Count -gt 0)
-    }
+    $ready = Test-DotNetReady $dotnet
     if (-not $ready) {
         if ($NoDependencyInstall) { throw '.NET SDK and .NET 8 runtime are missing.' }
         if (-not (Get-Command winget -ErrorAction SilentlyContinue)) { throw 'Install the .NET 8 SDK from https://dotnet.microsoft.com/download/dotnet/8.0 then run INSTALL.cmd again.' }
         Write-Host 'Installing Microsoft .NET 8 SDK through Windows Package Manager. Review any Windows or package prompts.'
         & winget install --id Microsoft.DotNet.SDK.8 --exact --source winget --architecture x64
+        if ($LASTEXITCODE -eq 3010) { throw '.NET installation requires a Windows restart. Restart and run INSTALL.cmd again.' }
         if ($LASTEXITCODE -ne 0) { throw '.NET installation did not complete. Install the .NET 8 SDK and run setup again.' }
         $dotnet = Join-Path $env:ProgramFiles 'dotnet\dotnet.exe'
-        if (-not (Test-Path -LiteralPath $dotnet)) { throw 'Restart Windows after the .NET installation, then run setup again.' }
+        if (-not (Test-DotNetReady $dotnet)) { throw '.NET SDK/runtime verification failed after installation. Restart Windows, check the .NET 8 SDK installation, then run setup again.' }
     }
     $env:PATH = (Split-Path -Parent $dotnet) + ';' + $env:PATH
     $source = Split-Path -Parent $PSScriptRoot
@@ -91,12 +96,24 @@ try {
             $existingExit = $LASTEXITCODE
             $ErrorActionPreference = 'Stop'
             if ($existingExit -eq 0) {
-                Write-Warning 'An etabs23 server already exists in Codex; it was preserved. Use mcp-config.json if you intend to replace it.'
+                $existing = $existingText | ConvertFrom-Json
+                if ($existing.transport.command -eq 'powershell.exe' -and
+                    (($existing.transport.args | ConvertTo-Json -Compress) -eq ($config.mcpServers.etabs23.args | ConvertTo-Json -Compress))) {
+                    Write-Host 'Codex registration already points to this installation; verified.'
+                } else {
+                    Write-Warning 'An etabs23 server with different settings already exists in Codex; it was preserved. Use mcp-config.json to replace it before using this installation.'
+                }
             } else {
                 & $codexPath mcp add etabs23 -- powershell.exe -NoProfile -ExecutionPolicy Bypass -File $launcher
                 if ($LASTEXITCODE -ne 0) { throw "Codex registration failed. Connector is built; use $InstallRoot\mcp-config.json for manual setup." }
-                & $codexPath mcp get etabs23 --json | Out-Null
+                $registeredText = & $codexPath mcp get etabs23 --json
                 if ($LASTEXITCODE -ne 0) { throw 'Could not verify Codex registration.' }
+                $registered = $registeredText | ConvertFrom-Json
+                if ($registered.transport.command -ne 'powershell.exe' -or
+                    (($registered.transport.args | ConvertTo-Json -Compress) -ne ($config.mcpServers.etabs23.args | ConvertTo-Json -Compress))) {
+                    throw 'Codex registration read-back did not match the intended launcher.'
+                }
+                Write-Host 'Codex registration command and arguments verified.'
             }
         } else {
             Write-Warning "Codex CLI was not found. Add the server in your MCP client using $InstallRoot\mcp-config.json."

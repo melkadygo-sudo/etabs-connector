@@ -74,6 +74,8 @@ Solver completion is not engineering validation. Review assignments, units, load
 
 ## Development and contributions
 
+Version 0.1.2 includes a real-Codex installer integration test. See [validation results and remaining clean-machine checks](docs/VALIDATION.md).
+
 ```powershell
 dotnet publish .\src\EtabsConnector\EtabsConnector.csproj -c Release -r win-x64 --self-contained false -o .\dist
 Get-Content .\tests\mcp-smoke.ndjson | .\dist\EtabsConnector.exe
