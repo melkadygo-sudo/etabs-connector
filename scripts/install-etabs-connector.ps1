@@ -9,7 +9,7 @@ param(
 $ErrorActionPreference = "Stop"
 try {
     Write-Host ""
-    Write-Host "ETABS Connector (0.1.2) Installation" -ForegroundColor Cyan
+    Write-Host "ETABS Connector (0.1.3) Installation" -ForegroundColor Cyan
     Write-Host "====================================" -ForegroundColor Cyan
 
     $PluginRoot = Split-Path -Parent $PSScriptRoot

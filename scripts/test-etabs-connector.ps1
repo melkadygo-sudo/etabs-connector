@@ -26,13 +26,20 @@ function Show-Check {
 
 try {
     Write-Host ""
-    Write-Host "ETABS Connector (0.1.2) Diagnostic Test" -ForegroundColor Cyan
+    Write-Host "ETABS Connector (0.1.3) Diagnostic Test" -ForegroundColor Cyan
     Write-Host "=======================================" -ForegroundColor Cyan
 
     $PluginRoot = Split-Path -Parent $PSScriptRoot
     $Settings = Join-Path $PluginRoot "connector.settings.ps1"
     $Executable = Join-Path $PluginRoot "dist\EtabsConnector.exe"
     $EtabsExecutable = "C:\Program Files\Computers and Structures\ETABS 23\ETABS.exe"
+
+    $LocalRuntime = Join-Path $PluginRoot 'runtime'
+    if (Test-Path -LiteralPath (Join-Path $LocalRuntime 'dotnet.exe')) {
+        $env:PATH = $LocalRuntime + ';' + $env:PATH
+        $env:DOTNET_ROOT = $LocalRuntime
+        $env:DOTNET_ROOT_X64 = $LocalRuntime
+    }
 
     $DotNet = Get-Command dotnet -ErrorAction SilentlyContinue
     Show-Check ".NET command" ($null -ne $DotNet) $(if ($DotNet) { (& dotnet --version) } else { "Install the .NET 8 SDK." })
@@ -54,7 +61,7 @@ try {
 
     if (Test-Path $Executable) {
         $Request = '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"get_capabilities","arguments":{}}}'
-        $ResponseText = $Request | & $Executable
+        $ResponseText = $Request | & powershell.exe -NoProfile -ExecutionPolicy Bypass -File (Join-Path $PluginRoot 'scripts\start-etabs-connector.ps1')
         $ExitCode = $LASTEXITCODE
         $ValidResponse = $false
         if ($ExitCode -eq 0 -and $ResponseText) {

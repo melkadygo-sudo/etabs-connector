@@ -1,6 +1,8 @@
 bin/
 obj/
 dist/
+runtime/
+runtime-path.txt
 connector.settings.ps1
 backup*/
 *.edb

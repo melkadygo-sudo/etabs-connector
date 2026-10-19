@@ -12,7 +12,17 @@ try {
         throw "ETABS Connector is not built. Run scripts\install-etabs-connector.cmd first."
     }
 
-    & $Executable
+    $LocalDotNet = Join-Path $PluginRoot 'runtime\dotnet.exe'
+    $RuntimePathFile = Join-Path $PluginRoot 'runtime-path.txt'
+    if (-not (Test-Path -LiteralPath $LocalDotNet) -and (Test-Path -LiteralPath $RuntimePathFile)) {
+        $LocalDotNet = (Get-Content -Raw -LiteralPath $RuntimePathFile).Trim()
+        if (-not (Test-Path -LiteralPath $LocalDotNet)) { throw 'Configured .NET runtime is missing. Run INSTALL.cmd again.' }
+    }
+    if (Test-Path -LiteralPath $LocalDotNet) {
+        & $LocalDotNet (Join-Path $PluginRoot 'dist\EtabsConnector.dll')
+    } else {
+        & $Executable
+    }
     exit $LASTEXITCODE
 }
 catch {

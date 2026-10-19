@@ -64,6 +64,13 @@ foreach ($id in @(1,2,3)) {
 $capabilityResponse = $parsed | Where-Object id -eq 3
 $capabilities = $capabilityResponse.result.content[0].text | ConvertFrom-Json
 if ($capabilities.writes_enabled -ne $false -or $capabilities.analysis_enabled -ne $false) { throw 'Fresh installation is not read-only.' }
+$savedEncoding = $OutputEncoding
+try {
+    $OutputEncoding = New-Object Text.UTF8Encoding($false)
+    $bomRequest = [string][char]0xFEFF + '{"jsonrpc":"2.0","id":91,"method":"ping"}'
+    $bomResponse = ($bomRequest | & $launch @arguments) | ConvertFrom-Json
+    if ($LASTEXITCODE -ne 0 -or $bomResponse.id -ne 91 -or $bomResponse.error) { throw 'UTF-8 BOM input was not accepted.' }
+} finally { $OutputEncoding = $savedEncoding }
 
 # A separately configured server must not be replaced by a repeat installation.
 $conflict = '& ' + (Quote-PS $codex) + ' mcp add etabs23 -- powershell.exe -NoProfile -Command Write-Output; exit $LASTEXITCODE'
@@ -72,5 +79,5 @@ $conflictHash = (Get-FileHash -LiteralPath (Join-Path $testConfig 'config.toml')
 $conflictOutput = Run-Isolated $setup 'preserve-conflict'
 $conflictOutput += Get-Content -Raw -LiteralPath (Join-Path $TestRoot 'preserve-conflict.stderr.txt')
 if ($conflictHash -ne (Get-FileHash -LiteralPath (Join-Path $testConfig 'config.toml')).Hash -or $conflictOutput -notmatch 'different settings') { throw 'Conflicting registration was not preserved and reported.' }
-Write-Host 'PASS: fresh registration, exact read-back, installed skill, registered MCP launch, read-only defaults, repeat install, conflicting registration preservation.'
+Write-Host 'PASS: fresh registration, exact read-back, installed skill, registered MCP launch, UTF-8 BOM input, read-only defaults, repeat install, conflicting registration preservation.'
 Write-Host 'This is an isolated-configuration test on an existing Windows host, not a clean-OS certification.'

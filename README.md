@@ -18,7 +18,7 @@ ETABS runs on your computer. This package does not supply ETABS, a license, or C
 2. Open the extracted folder and double-click **INSTALL.cmd**.
 3. Follow any Windows/.NET prompts, then restart Codex and open ETABS 23.
 
-No terminal commands or configuration editing are needed for a new Codex setup when its CLI is available. The installer detects ETABS 23 (or opens a file picker), installs the .NET 8 SDK through Microsoft's WinGet package if needed, builds into `%LOCALAPPDATA%\ETABS-Connector`, checks server startup, registers the `etabs23` MCP server, and installs the user skill. Internet access is needed for missing dependencies and build restore. ETABS must already be installed and licensed.
+No terminal commands or configuration editing are needed for a new Codex setup when its CLI is available. The installer detects ETABS 23 (or opens a file picker), installs the .NET 8 SDK if needed (WinGet when available, otherwise a SHA-512-verified SDK ZIP from Microsoft), builds into `%LOCALAPPDATA%\ETABS-Connector`, checks server startup, registers the `etabs23` MCP server, and installs the user skill. Internet access is needed for missing dependencies and build restore. ETABS must already be installed and licensed.
 
 New installations start read-only. Existing settings, skills, and an existing `etabs23` registration are preserved. If Codex CLI is unavailable or an existing server points elsewhere, setup reports the remaining manual step and provides `mcp-config.json` in the installation folder for your client. Windows security or administrator prompts may still require a click; this is not a silent installer. Run only the extracted package, not INSTALL.cmd alone inside a ZIP.
 
@@ -74,7 +74,7 @@ Solver completion is not engineering validation. Review assignments, units, load
 
 ## Development and contributions
 
-Version 0.1.2 includes a real-Codex installer integration test. See [validation results and remaining clean-machine checks](docs/VALIDATION.md).
+Version 0.1.3 includes a real-Codex installer integration test. See [validation results and remaining clean-machine checks](docs/VALIDATION.md).
 
 ```powershell
 dotnet publish .\src\EtabsConnector\EtabsConnector.csproj -c Release -r win-x64 --self-contained false -o .\dist

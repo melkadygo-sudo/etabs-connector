@@ -11,9 +11,13 @@ The connector uses ETABS COM automation supplied with ETABS (23). This source pa
 
 ## Recommended installation
 
-Download and extract the repository ZIP, then double-click the root **INSTALL.cmd**. It installs into `%LOCALAPPDATA%\ETABS-Connector`, detects ETABS (or asks you to select it), handles missing .NET through WinGet, builds and checks startup, and configures Codex when its CLI is available. Windows/package prompts remain interactive. New installations start read-only; existing settings and client registrations are preserved. See the README for exceptions and enabling changes.
+Download and extract the repository ZIP, then double-click the root **INSTALL.cmd**. It installs into `%LOCALAPPDATA%\ETABS-Connector`, detects ETABS (or asks you to select it), handles missing .NET through WinGet or a verified SDK ZIP from Microsoft, builds and checks startup, and configures Codex when its CLI is available. Windows/package prompts remain interactive. New installations start read-only; existing settings and client registrations are preserved. See the README for exceptions and enabling changes.
 
 ## Manual install
+
+If WinGet is unavailable, the guided installer downloads a .NET 8 SDK ZIP from Microsoft's release metadata and verifies its SHA-512 checksum before extraction. It stores the SDK in the installation's `runtime` folder. You can explicitly choose this per-installation SDK with `scripts\setup.ps1 -UseLocalSdk`; it does not replace system .NET. Internet access and working DNS are required. If a download fails, correct connectivity and rerun setup.
+
+The generated `runtime-path.txt` records the selected runtime for future launches. Do not publish this file or the `runtime` folder. Keep an externally selected SDK installed while the connector uses it; otherwise rerun setup to select or install a working runtime.
 
 The legacy launcher below enables writes and analysis on first installation:
 

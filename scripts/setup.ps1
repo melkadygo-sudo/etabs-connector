@@ -4,9 +4,11 @@ param(
     [string]$SkillRoot = "$env:USERPROFILE\.agents\skills\etabs-connector",
     [string]$AllowedRoots = "$env:USERPROFILE\Documents\ETABS-MCP",
     [switch]$SkipCodex,
+    [switch]$UseLocalSdk,
     [switch]$NoDependencyInstall
 )
 $ErrorActionPreference = 'Stop'
+$InstallRoot = [IO.Path]::GetFullPath($InstallRoot)
 function Test-DotNetReady([string]$Executable) {
     if (-not (Test-Path -LiteralPath $Executable)) { return $false }
     $sdks = @(& $Executable --list-sdks)
@@ -46,23 +48,46 @@ try {
     if ([Diagnostics.FileVersionInfo]::GetVersionInfo($etabsExe).FileMajorPart -ne 23) { throw 'This connector requires ETABS 23.' }
     Write-Host "ETABS found: $EtabsPath"
 
-    $dotnet = Join-Path $env:ProgramFiles 'dotnet\dotnet.exe'
-    if (-not (Test-Path -LiteralPath $dotnet)) {
+    $localSdk = Join-Path $InstallRoot 'runtime'
+    $dotnet = Join-Path $localSdk 'dotnet.exe'
+    if (-not $UseLocalSdk -and -not (Test-DotNetReady $dotnet)) { $dotnet = Join-Path $env:ProgramFiles 'dotnet\dotnet.exe' }
+    if (-not $UseLocalSdk -and -not (Test-Path -LiteralPath $dotnet)) {
         $found = Get-Command dotnet -ErrorAction SilentlyContinue
         if ($found) { $dotnet = $found.Source }
     }
     $ready = Test-DotNetReady $dotnet
     if (-not $ready) {
         if ($NoDependencyInstall) { throw '.NET SDK and .NET 8 runtime are missing.' }
-        if (-not (Get-Command winget -ErrorAction SilentlyContinue)) { throw 'Install the .NET 8 SDK from https://dotnet.microsoft.com/download/dotnet/8.0 then run INSTALL.cmd again.' }
+        if ($UseLocalSdk -or -not (Get-Command winget -ErrorAction SilentlyContinue)) {
+            Write-Host 'Downloading Microsoft .NET 8 SDK for this connector only.'
+            [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+            $metadata = Invoke-RestMethod 'https://builds.dotnet.microsoft.com/dotnet/release-metadata/8.0/releases.json'
+            $sdk = @($metadata.releases | ForEach-Object { $_.sdks } | Where-Object { $_.version -eq $metadata.'latest-sdk' }) | Select-Object -First 1
+            $asset = $sdk.files | Where-Object { $_.rid -eq 'win-x64' -and $_.name -like '*.zip' } | Select-Object -First 1
+            $uri = [Uri]$asset.url
+            if (-not $asset -or $asset.hash -notmatch '^[a-fA-F0-9]{128}$' -or $uri.Scheme -ne 'https' -or $uri.Host -ne 'builds.dotnet.microsoft.com') { throw 'Unexpected Microsoft SDK metadata; download stopped.' }
+            New-Item -ItemType Directory -Force -Path $localSdk | Out-Null
+            $archive = Join-Path $localSdk ('sdk-' + [Guid]::NewGuid().ToString('N') + '.zip')
+            try {
+                $ProgressPreference = 'SilentlyContinue'
+                Invoke-WebRequest -UseBasicParsing -Uri $uri.AbsoluteUri -OutFile $archive
+                if ((Get-FileHash -LiteralPath $archive -Algorithm SHA512).Hash -ne $asset.hash) { throw '.NET SDK SHA-512 verification failed.' }
+                Write-Host 'SDK checksum verified. Extracting local SDK...'
+                Expand-Archive -LiteralPath $archive -DestinationPath $localSdk -Force
+            } finally { if (Test-Path -LiteralPath $archive) { Remove-Item -LiteralPath $archive } }
+            $dotnet = Join-Path $localSdk 'dotnet.exe'
+        } else {
         Write-Host 'Installing Microsoft .NET 8 SDK through Windows Package Manager. Review any Windows or package prompts.'
         & winget install --id Microsoft.DotNet.SDK.8 --exact --source winget --architecture x64
         if ($LASTEXITCODE -eq 3010) { throw '.NET installation requires a Windows restart. Restart and run INSTALL.cmd again.' }
         if ($LASTEXITCODE -ne 0) { throw '.NET installation did not complete. Install the .NET 8 SDK and run setup again.' }
         $dotnet = Join-Path $env:ProgramFiles 'dotnet\dotnet.exe'
+        }
         if (-not (Test-DotNetReady $dotnet)) { throw '.NET SDK/runtime verification failed after installation. Restart Windows, check the .NET 8 SDK installation, then run setup again.' }
     }
     $env:PATH = (Split-Path -Parent $dotnet) + ';' + $env:PATH
+    $env:DOTNET_ROOT = Split-Path -Parent $dotnet
+    $env:DOTNET_ROOT_X64 = $env:DOTNET_ROOT
     $source = Split-Path -Parent $PSScriptRoot
     $InstallRoot = [IO.Path]::GetFullPath($InstallRoot)
     New-Item -ItemType Directory -Force -Path $InstallRoot | Out-Null
@@ -79,11 +104,13 @@ try {
     }
     & powershell.exe -NoProfile -ExecutionPolicy Bypass -File (Join-Path $InstallRoot 'scripts\install-etabs-connector.ps1') -EtabsPath $EtabsPath -AllowedRoots $AllowedRoots
     if ($LASTEXITCODE -ne 0) { throw 'Build failed. Correct the error above and run setup again.' }
+    # Persist the chosen runtime so later client launches do not depend on PATH.
+    Set-Content -LiteralPath (Join-Path $InstallRoot 'runtime-path.txt') -Value $dotnet -Encoding UTF8
     $launcher = Join-Path $InstallRoot 'scripts\start-etabs-connector.ps1'
     $response = '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"get_capabilities","arguments":{}}}' | & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $launcher
     if ($LASTEXITCODE -ne 0) { throw 'Connector startup failed.' }
     $capabilities = $response | ConvertFrom-Json
-    if ($capabilities.error -or -not $capabilities.result -or $capabilities.result.isError) { throw 'Connector capabilities check failed.' }
+    if ($capabilities.error -or -not $capabilities.result -or $capabilities.result.isError) { throw ('Connector capabilities check failed: ' + ($response -join ' ')) }
 
     $config = @{ mcpServers = @{ etabs23 = @{ command = 'powershell.exe'; args = @('-NoProfile','-ExecutionPolicy','Bypass','-File',$launcher) } } }
     $config | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath (Join-Path $InstallRoot 'mcp-config.json') -Encoding UTF8
