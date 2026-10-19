@@ -1,0 +1,17 @@
+{
+  "mcpServers": {
+    "etabs23": {
+      "title": "ETABS 23",
+      "description": "Controlled local read and write access to ETABS 23.",
+      "cwd": ".",
+      "command": "powershell.exe",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "./scripts/start-etabs-connector.ps1"
+      ]
+    }
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "name": "etabs-connector",
+  "version": "0.1.1",
+  "description": "Local MCP connector with guarded access to the full installed ETABS 23 API.",
+  "author": {
+    "name": "Mohamed Elkady"
+  },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "ETABS Connector",
+    "shortDescription": "Access the complete ETABS 23 API with guarded reads, writes, and analysis.",
+    "longDescription": "Connects Codex to local ETABS 23 through a .NET 8 MCP server with purpose-built workflows plus discovery and guarded invocation of all methods in the installed ETABS API assembly.",
+    "developerName": "Mohamed Elkady",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "defaultPrompt": [
+      "Inspect my active ETABS model and summarise it.",
+      "Save a working copy, then change selected sections.",
+      "Run analysis and extract selected reactions."
+    ]
+  },
+  "mcpServers": "./.mcp.json"
+}

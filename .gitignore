@@ -1,0 +1,12 @@
+bin/
+obj/
+dist/
+connector.settings.ps1
+backup*/
+*.edb
+*.EDB
+*.e2k
+*.log
+.vs/
+.env
+.env.*
