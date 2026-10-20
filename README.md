@@ -1,4 +1,4 @@
-# ETABS Connector
+# StructLink for ETABS
 
 **Connect Codex to ETABS 23. Inspect models, make controlled changes, and retrieve analysis results through natural-language requests.**
 
@@ -6,7 +6,9 @@ Built for structural engineers working with ETABS on Windows. Includes a local M
 
 **Windows x64 · ETABS 23 · Version 0.1.3 · MIT license**
 
-[**Download ZIP**](https://github.com/melkadygo-sudo/etabs-connector/archive/refs/heads/main.zip) · [Setup guide](docs/SETUP.md) · [Test results](docs/VALIDATION.md) · [Report an issue](https://github.com/melkadygo-sudo/etabs-connector/issues)
+[**Download ZIP**](https://github.com/melkadygo-sudo/structlink-etabs/archive/refs/heads/main.zip) · [Setup guide](docs/SETUP.md) · [Test results](docs/VALIDATION.md) · [Report an issue](https://github.com/melkadygo-sudo/structlink-etabs/issues)
+
+> Formerly ETABS Connector. Existing installations retain the `etabs23` server ID and original installation paths for compatibility.
 
 ## What you can do
 
@@ -25,7 +27,7 @@ Built for structural engineers working with ETABS on Windows. Includes a local M
 
 ### 1. Download and extract
 
-[**Download ETABS Connector**](https://github.com/melkadygo-sudo/etabs-connector/archive/refs/heads/main.zip), then choose **Extract all**.
+[**Download StructLink for ETABS**](https://github.com/melkadygo-sudo/structlink-etabs/archive/refs/heads/main.zip), then choose **Extract all**.
 
 Before installing, you need:
 
@@ -48,7 +50,7 @@ The installer detects ETABS, builds and checks the connector, registers it with 
 Restart Codex, open ETABS 23 with a test model, and send:
 
 ```text
-Use ETABS Connector to inspect the active model without making changes.
+Use StructLink for ETABS to inspect the active model without making changes.
 Report the model path, ETABS version, units, and load definitions.
 ```
 
@@ -159,7 +161,7 @@ Open ETABS with a disposable test model and run `scripts\test-etabs-connector.cm
 
 ## Contributing and support
 
-[Open an issue](https://github.com/melkadygo-sudo/etabs-connector/issues) with your Windows version, ETABS build, connector version, tool name, and a redacted error message. Suggestions and pull requests are welcome.
+[Open an issue](https://github.com/melkadygo-sudo/structlink-etabs/issues) with your Windows version, ETABS build, connector version, tool name, and a redacted error message. Suggestions and pull requests are welcome.
 
 Do not upload confidential models, credentials, personal paths, or licensed CSI binaries.
 

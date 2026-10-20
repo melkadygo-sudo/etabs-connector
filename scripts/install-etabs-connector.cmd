@@ -1,9 +1,9 @@
 @echo off
 setlocal
-title ETABS Connector Installation
+title StructLink for ETABS Installation
 cd /d "%~dp0"
 
-echo Starting the ETABS Connector installer...
+echo Starting the StructLink for ETABS installer...
 echo.
 powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File "%~dp0install-etabs-connector.ps1" -EnableWrites -EnableAnalysis
 set "RESULT=%ERRORLEVEL%"

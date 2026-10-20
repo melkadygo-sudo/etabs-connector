@@ -19,7 +19,7 @@ function Test-DotNetReady([string]$Executable) {
         (@($runtimes | Where-Object { $_ -match '^Microsoft.NETCore.App 8\.' }).Count -gt 0)
 }
 try {
-    Write-Host 'ETABS Connector - guided setup' -ForegroundColor Cyan
+    Write-Host 'StructLink for ETABS - guided setup' -ForegroundColor Cyan
     Write-Host 'Installs locally, builds the server, and connects it to Codex when available.'
     Write-Host 'New installations start read-only. Existing settings are preserved.'
     if (-not [Environment]::Is64BitOperatingSystem) { throw 'Windows x64 is required.' }
@@ -151,7 +151,7 @@ try {
         } else { Write-Host 'Existing user skill preserved.' }
     }
     Write-Host "Connector installed and startup verified: $InstallRoot" -ForegroundColor Green
-    Write-Host 'Restart Codex, open ETABS 23, and ask: Use ETABS Connector to inspect my model without changes.'
+    Write-Host 'Restart Codex, open ETABS 23, and ask: Use StructLink for ETABS to inspect my model without changes.'
     Write-Host "Permissions: edit $InstallRoot\connector.settings.ps1 to enable writes and analysis, then restart your client."
     exit 0
 } catch {

@@ -1,4 +1,4 @@
-# ETABS 23 Connector Setup
+# StructLink for ETABS Setup
 
 ## Requirements
 
@@ -83,7 +83,7 @@ For an authorized write or analysis operation, the connector automatically unloc
 2. Run `test-etabs-connector.cmd` and resolve any failed checks.
 3. Open a noncritical test model.
 4. Start a new Codex thread with the plugin enabled.
-5. Ask: “Use ETABS Connector to report capabilities and inspect the active model. Do not make changes.”
+5. Ask: “Use StructLink for ETABS to report capabilities and inspect the active model. Do not make changes.”
 6. Confirm the returned path, version, units, object counts, and load definitions.
 7. Choose whether to save a working copy into the allowed root or reuse the open model.
 8. Test one harmless assignment on the selected model, then confirm it manually in ETABS.

@@ -7,7 +7,7 @@
   },
   "skills": "./skills/",
   "interface": {
-    "displayName": "ETABS Connector",
+    "displayName": "StructLink for ETABS",
     "shortDescription": "Access the complete ETABS 23 API with guarded reads, writes, and analysis.",
     "longDescription": "Connects Codex to local ETABS 23 through a .NET 8 MCP server with purpose-built workflows plus discovery and guarded invocation of all methods in the installed ETABS API assembly.",
     "developerName": "Mohamed Elkady",

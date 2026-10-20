@@ -3,7 +3,7 @@ name: etabs-connector
 description: Use the local ETABS 23 MCP connector with read/write access to inspect models, optionally create working copies, modify the chosen open model, run analysis, and extract bounded structural results. Use whenever the user asks to connect to, read, modify, analyse, or extract data from an ETABS 23 model through this plugin.
 ---
 
-# ETABS Connector
+# StructLink for ETABS
 
 Use ETABS as a read/write calculation engine while keeping the selected file, units, model state, changes, and verification explicit.
 

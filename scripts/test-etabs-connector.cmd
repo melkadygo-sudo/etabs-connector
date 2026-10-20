@@ -1,9 +1,9 @@
 @echo off
 setlocal
-title ETABS Connector Diagnostic Test
+title StructLink for ETABS Diagnostic Test
 cd /d "%~dp0"
 
-echo Starting the ETABS Connector diagnostic test...
+echo Starting the StructLink for ETABS diagnostic test...
 echo.
 powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File "%~dp0test-etabs-connector.ps1"
 set "RESULT=%ERRORLEVEL%"

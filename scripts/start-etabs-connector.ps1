@@ -9,7 +9,7 @@ try {
     }
 
     if (-not (Test-Path $Executable)) {
-        throw "ETABS Connector is not built. Run scripts\install-etabs-connector.cmd first."
+        throw "StructLink for ETABS is not built. Run scripts\install-etabs-connector.cmd first."
     }
 
     $LocalDotNet = Join-Path $PluginRoot 'runtime\dotnet.exe'
@@ -26,6 +26,6 @@ try {
     exit $LASTEXITCODE
 }
 catch {
-    Write-Error "ETABS Connector failed to start: $($_.Exception.Message)"
+    Write-Error "StructLink for ETABS failed to start: $($_.Exception.Message)"
     exit 1
 }
