@@ -97,7 +97,7 @@ internal sealed class McpServer
         {
             protocolVersion = negotiated,
             capabilities = new { tools = new { listChanged = false } },
-            serverInfo = new { name = "etabs-connector", version = "0.1.3" },
+            serverInfo = new { name = "etabs-connector", version = "0.1.4" },
             instructions =
                 "Connect read-only first. For write or analysis tasks, use the user-selected open model or an optional working copy; unlock automatically when required. Discover and invoke the full installed ETABS 23 API through the generic gateway. " +
                 $"Writes enabled: {_settings.AllowWrites}. Analysis enabled: {_settings.AllowAnalysis}."

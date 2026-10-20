@@ -1,6 +1,6 @@
 {
   "name": "etabs-connector",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Local MCP connector with guarded access to the full installed ETABS 23 API.",
   "author": {
     "name": "Mohamed Elkady"

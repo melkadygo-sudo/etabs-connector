@@ -26,7 +26,7 @@ function Show-Check {
 
 try {
     Write-Host ""
-    Write-Host "StructLink for ETABS (0.1.3) Diagnostic Test" -ForegroundColor Cyan
+    Write-Host "StructLink for ETABS (0.1.4) Diagnostic Test" -ForegroundColor Cyan
     Write-Host "=======================================" -ForegroundColor Cyan
 
     $PluginRoot = Split-Path -Parent $PSScriptRoot
@@ -52,7 +52,7 @@ try {
     Show-Check "Connector settings" (Test-Path $Settings) $Settings
     if (Test-Path $Settings) {
         . $Settings
-        Write-Host "       Allowed roots: $env:ETABS_CONNECTOR_ALLOWED_ROOTS"
+        Write-Host "       Model folders: unrestricted (Windows permissions apply)."
         Write-Host "       Writes enabled: $env:ETABS_CONNECTOR_ALLOW_WRITES"
         Write-Host "       Analysis enabled: $env:ETABS_CONNECTOR_ALLOW_ANALYSIS"
     }

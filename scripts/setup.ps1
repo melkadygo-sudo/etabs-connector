@@ -2,7 +2,8 @@ param(
     [string]$EtabsPath,
     [string]$InstallRoot = "$env:LOCALAPPDATA\ETABS-Connector",
     [string]$SkillRoot = "$env:USERPROFILE\.agents\skills\etabs-connector",
-    [string]$AllowedRoots = "$env:USERPROFILE\Documents\ETABS-MCP",
+    # Accepted for compatibility with older commands; no longer used.
+    [string]$AllowedRoots,
     [switch]$SkipCodex,
     [switch]$UseLocalSdk,
     [switch]$NoDependencyInstall
@@ -102,7 +103,7 @@ try {
             Copy-Item -LiteralPath (Join-Path $source $file) -Destination $InstallRoot -Force
         }
     }
-    & powershell.exe -NoProfile -ExecutionPolicy Bypass -File (Join-Path $InstallRoot 'scripts\install-etabs-connector.ps1') -EtabsPath $EtabsPath -AllowedRoots $AllowedRoots
+    & powershell.exe -NoProfile -ExecutionPolicy Bypass -File (Join-Path $InstallRoot 'scripts\install-etabs-connector.ps1') -EtabsPath $EtabsPath
     if ($LASTEXITCODE -ne 0) { throw 'Build failed. Correct the error above and run setup again.' }
     # Persist the chosen runtime so later client launches do not depend on PATH.
     Set-Content -LiteralPath (Join-Path $InstallRoot 'runtime-path.txt') -Value $dotnet -Encoding UTF8

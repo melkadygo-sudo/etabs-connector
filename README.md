@@ -4,7 +4,7 @@
 
 Built for structural engineers working with ETABS on Windows. Includes a local MCP server, a Codex skill, a guided installer, and source code. MCP (Model Context Protocol) lets your AI assistant call tools exposed by the connector.
 
-**Windows x64 · ETABS 23 · Version 0.1.3 · MIT license**
+**Windows x64 · ETABS 23 · Version 0.1.4 · MIT license**
 
 [**Download ZIP**](https://github.com/melkadygo-sudo/structlink-etabs/archive/refs/heads/main.zip) · [Setup guide](docs/SETUP.md) · [Test results](docs/VALIDATION.md) · [Report an issue](https://github.com/melkadygo-sudo/structlink-etabs/issues)
 
@@ -67,7 +67,7 @@ List the frame sections assigned in the active model. Do not change anything.
 **Change an assignment** — requires write permission
 
 ```text
-Save a working copy of this model in my allowed folder. Ask me which frame
+Save a working copy of this model in a folder I choose. Ask me which frame
 and section to use, update that assignment, and read it back to verify it.
 ```
 
@@ -93,7 +93,7 @@ $env:ETABS_CONNECTOR_ALLOW_WRITES = 'true'
 $env:ETABS_CONNECTOR_ALLOW_ANALYSIS = 'true'
 ```
 
-Configure `ETABS_CONNECTOR_ALLOWED_ROOTS` for the folders containing your models and working copies. See the [setup guide](docs/SETUP.md) for custom paths and permissions.
+Version 0.1.4 removes the allowed-folder restriction. Use any model folder accessible to your Windows account. Older `ETABS_CONNECTOR_ALLOWED_ROOTS` settings and `-AllowedRoots` arguments are ignored. Model open/save operations still require `.edb` files; write and analysis permissions remain separate.
 
 ## What has been tested
 
@@ -117,7 +117,7 @@ Read the [validation report](docs/VALIDATION.md) for the procedure and remaining
 - Choose whether to save a working copy or use the open model before making changes. The connector can modify the open model directly when writes are enabled.
 - The connector automatically unlocks the model when required. Unlocking can invalidate analysis results.
 - Review assignments, units, loads, and results in ETABS. Successful solver completion does not establish engineering correctness.
-- Allowed folders constrain supported file operations. Generic API classification and path checks use heuristics; they are not a complete sandbox for every API side effect. Review generic methods and verify their results explicitly.
+- Folder access follows Windows permissions. Generic API classification uses heuristics; it is not a complete sandbox for every API side effect. Review generic methods and verify their results explicitly.
 
 ETABS automation runs locally. Model information returned to your AI client is handled under that client's data policies.
 
@@ -131,7 +131,7 @@ The connector supports clients that launch a local stdio MCP server. Installing 
 Install the .NET 8 SDK, extract this repository, and open PowerShell in the extracted folder:
 
 ```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install-etabs-connector.ps1 -AllowedRoots "C:\ETABS-MCP"
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install-etabs-connector.ps1
 ```
 
 This command starts with writes and analysis disabled. Existing settings are preserved. The legacy `scripts/install-etabs-connector.cmd` enables writes and analysis on first installation; use the root `INSTALL.cmd` for the recommended read-only setup.

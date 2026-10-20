@@ -63,6 +63,7 @@ foreach ($id in @(1,2,3)) {
 }
 $capabilityResponse = $parsed | Where-Object id -eq 3
 $capabilities = $capabilityResponse.result.content[0].text | ConvertFrom-Json
+if ($capabilities.folder_restrictions_enabled -ne $false) { throw 'Folder restriction is still enabled.' }
 if ($capabilities.writes_enabled -ne $false -or $capabilities.analysis_enabled -ne $false) { throw 'Fresh installation is not read-only.' }
 $savedEncoding = $OutputEncoding
 try {

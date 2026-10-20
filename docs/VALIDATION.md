@@ -1,4 +1,16 @@
-# Installer validation — 0.1.3
+# Installer validation — 0.1.4
+
+## Version 0.1.4 — 2026-10-20
+
+The host installer integration suite passed after removing folder restrictions, including a fresh build, automatic Codex registration, exact registered-command launch, skill installation, read-only defaults, repeat-install preservation, and conflicting-registration preservation. Capabilities report `folder_restrictions_enabled: false`.
+
+A separate regression test passed for paths outside a legacy configured root, another drive, and a UNC network share. It also checks generic file paths, ignored legacy root settings, invalid model paths, and unchanged write/analysis defaults. These checks validate path acceptance without connecting to ETABS or accessing an actual network share.
+
+```powershell
+dotnet run --project .\tests\PathValidation\PathValidation.csproj
+```
+
+The Windows Sandbox results below apply to version 0.1.3; Sandbox was not rerun for 0.1.4. Download the current ZIP and rerun `INSTALL.cmd` to update an existing installation, then restart Codex. A conflicting registration must still be updated manually as instructed by setup.
 
 Tested on 2026-10-19 using Windows 11 Pro, Codex CLI 0.145.0, .NET SDK 9.0.306 with the .NET 8 runtime, and locally installed ETABS 23.
 

@@ -30,7 +30,7 @@ internal sealed class EtabsSession : IDisposable
         transport = "MCP stdio",
         writes_enabled = _settings.AllowWrites,
         analysis_enabled = _settings.AllowAnalysis,
-        allowed_roots = _settings.AllowedRoots,
+        folder_restrictions_enabled = false,
         maximum_result_rows = _settings.MaximumResultRows,
         working_copy_required_for_writes = false,
         model_copy_optional_for_writes = true,
@@ -83,7 +83,7 @@ internal sealed class EtabsSession : IDisposable
     public object OpenModel(string path, bool confirmReplaceActive)
     {
         EnsureConnected();
-        var fullPath = _settings.RequireAllowedPath(path, createParent: false);
+        var fullPath = _settings.ValidateModelPath(path, createParent: false);
         if (!File.Exists(fullPath))
             throw new ConnectorException($"Model file does not exist: {fullPath}");
 
@@ -210,7 +210,7 @@ internal sealed class EtabsSession : IDisposable
     {
         EnsureWriteEnabled();
         EnsureConnected();
-        var fullPath = _settings.RequireAllowedPath(path, createParent: true);
+        var fullPath = _settings.ValidateModelPath(path, createParent: true);
         var sourcePath = (string)_sapModel!.GetModelFilename(true);
         if (!string.IsNullOrWhiteSpace(sourcePath)
             && Path.GetFullPath(sourcePath).Equals(fullPath, StringComparison.OrdinalIgnoreCase))
@@ -729,7 +729,7 @@ internal sealed class EtabsSession : IDisposable
                 continue;
             var path = property.Value.GetString();
             if (!string.IsNullOrWhiteSpace(path))
-                _settings.RequireAllowedFileSystemPath(path, createParent: false);
+                _settings.ValidateFileSystemPath(path, createParent: false);
         }
     }
 
@@ -835,13 +835,13 @@ internal sealed class EtabsSession : IDisposable
             : fullActive;
         try
         {
-            var allowed = _settings.RequireAllowedPath(candidate, createParent: false);
+            var allowed = _settings.ValidateModelPath(candidate, createParent: false);
             if (File.Exists(allowed))
                 _workingCopyPath = allowed;
         }
         catch (ConnectorException)
         {
-            // Active model is outside authorised roots and cannot be adopted for writes.
+            // The active model does not have a supported model-file path.
         }
     }
 

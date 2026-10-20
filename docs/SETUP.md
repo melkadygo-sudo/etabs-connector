@@ -32,12 +32,12 @@ For a customised installation, open PowerShell in the plugin folder and run:
 ```powershell
 Set-ExecutionPolicy -Scope Process Bypass
 .\scripts\install-etabs-connector.ps1 `
-  -AllowedRoots "C:\ETABS-MCP" `
+  `
   -EnableWrites `
   -EnableAnalysis
 ```
 
-Choose an allowed root that contains the models you intend to open and the working copies you intend to create. Multiple roots can be set later in `connector.settings.ps1` using semicolon separation.
+As of 0.1.4, model folders are unrestricted by the connector. Windows permissions still apply. Legacy `ETABS_CONNECTOR_ALLOWED_ROOTS` settings and `-AllowedRoots` arguments are ignored.
 
 The installer publishes the .NET application into `dist` and creates a local settings file. Do not share `connector.settings.ps1` if it contains confidential paths. For a non-default ETABS installation, pass `-EtabsPath "D:\Applications\ETABS 23"`; that folder must contain ETABS.exe and ETABSv1.dll. The diagnostic script still checks the default ETABS executable location.
 
@@ -75,7 +75,7 @@ Model changes and analysis require all of the following:
 
 The skill asks whether to save a working copy or reuse the open model. Creating a copy is optional; the server does not enforce it as a write prerequisite.
 
-For an authorized write or analysis operation, the connector automatically unlocks the selected model when required. It restricts file open and save operations to configured roots and limits extracted rows.
+For an authorized write or analysis operation, the connector automatically unlocks the selected model when required. It accepts model paths accessible to Windows and limits extracted rows.
 
 ## First test
 
@@ -85,7 +85,7 @@ For an authorized write or analysis operation, the connector automatically unloc
 4. Start a new Codex thread with the plugin enabled.
 5. Ask: “Use StructLink for ETABS to report capabilities and inspect the active model. Do not make changes.”
 6. Confirm the returned path, version, units, object counts, and load definitions.
-7. Choose whether to save a working copy into the allowed root or reuse the open model.
+7. Choose whether to save a working copy in your chosen folder or reuse the open model.
 8. Test one harmless assignment on the selected model, then confirm it manually in ETABS.
 
 Do not begin with a live project model. Complete read, write, analysis, and result extraction tests on a disposable model first.
@@ -113,7 +113,7 @@ Do not begin with a live project model. Complete read, write, analysis, and resu
 
 ## Known limitations
 
-The generic gateway can expose operations beyond the purpose-built tools, including destructive operations. Method classification and file-path checks are heuristic, not a complete sandbox. Generic calls require corresponding read-back checks; the connector does not verify every API operation automatically.
+The generic gateway can expose operations beyond the purpose-built tools, including destructive operations. Method classification is heuristic, not a complete sandbox. Generic calls require corresponding read-back checks; the connector does not verify every API operation automatically.
 
 Compile and test on the target ETABS computer. Exact API compatibility must be confirmed against the API help installed with that ETABS build. The included MCP smoke fixture checks startup and tool discovery, not model mutations or structural correctness.
 

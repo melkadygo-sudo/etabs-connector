@@ -1,6 +1,7 @@
 param(
     [string]$EtabsPath = "C:\Program Files\Computers and Structures\ETABS 23",
-    [string]$AllowedRoots = "$env:USERPROFILE\Documents\ETABS-MCP",
+    # Accepted for compatibility with older commands; no longer used.
+    [string]$AllowedRoots,
     [switch]$EnableWrites,
     [switch]$EnableAnalysis,
     [switch]$Pause
@@ -9,7 +10,7 @@ param(
 $ErrorActionPreference = "Stop"
 try {
     Write-Host ""
-    Write-Host "StructLink for ETABS (0.1.3) Installation" -ForegroundColor Cyan
+    Write-Host "StructLink for ETABS (0.1.4) Installation" -ForegroundColor Cyan
     Write-Host "====================================" -ForegroundColor Cyan
 
     $PluginRoot = Split-Path -Parent $PSScriptRoot
@@ -38,9 +39,7 @@ try {
         Write-Warning "The active SDK is $SdkVersion. The project targets .NET 8."
     }
 
-    Write-Host "[3/5] Preparing the allowed model folder..."
-    New-Item -ItemType Directory -Force -Path $AllowedRoots | Out-Null
-    Write-Host "      Allowed root: $AllowedRoots" -ForegroundColor Green
+    Write-Host "[3/5] Model folders: unrestricted (Windows permissions apply)."
 
     Write-Host "[4/5] Building the connector..."
     & dotnet publish $Project -c Release -r win-x64 --self-contained false -o $Output "-p:EtabsPath=$EtabsPath"
@@ -52,7 +51,6 @@ try {
     $WriteValue = if ($EnableWrites) { "true" } else { "false" }
     $AnalysisValue = if ($EnableAnalysis) { "true" } else { "false" }
     $SettingsContent = @"
-`$env:ETABS_CONNECTOR_ALLOWED_ROOTS = '$($AllowedRoots.Replace("'", "''"))'
 `$env:ETABS_CONNECTOR_ALLOW_WRITES = '$WriteValue'
 `$env:ETABS_CONNECTOR_ALLOW_ANALYSIS = '$AnalysisValue'
 `$env:ETABS_CONNECTOR_MAX_RESULT_ROWS = '10000'
